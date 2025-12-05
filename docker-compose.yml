@@ -1,10 +1,60 @@
-version: '3.8'
 services:
-  app:
+  web:
     build: .
+    command: gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application
     volumes:
-      - ./:/app
-    command: python src/main.py
-    environment:
-      - PYTHONUNBUFFERED=1
-    tty: true
+      - .:/app
+      - static_volume:/app/staticfiles
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - tax-taxi-network
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    networks:
+      - tax-taxi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - tax-taxi-network
+
+  celery:
+    build: .
+    command: celery -A config worker -l info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - tax-taxi-network
+
+volumes:
+  postgres_data:
+  static_volume:
+
+networks:
+  tax-taxi-network:
+    driver: bridge

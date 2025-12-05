@@ -85,6 +85,20 @@ DATABASES = {
 }
 
 
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = '/app/staticfiles'  # This is crucial for collectstatic
+
+# For development (optional)
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/app/media/'
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
