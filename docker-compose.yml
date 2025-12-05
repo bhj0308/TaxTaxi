@@ -5,13 +5,16 @@ services:
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
+      - media_volume:/app/media
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - tax-taxi-network
 
@@ -26,7 +29,7 @@ services:
     networks:
       - tax-taxi-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,22 +41,23 @@ services:
     networks:
       - tax-taxi-network
 
-  celery:
-    build: .
-    command: celery -A config worker -l info
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
-    networks:
-      - tax-taxi-network
+  # celery:
+  #   build: .
+  #   command: celery -A config worker -l info
+  #   volumes:
+  #     - .:/app
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   networks:
+  #     - tax-taxi-network
 
 volumes:
   postgres_data:
   static_volume:
+  media_volume:
 
 networks:
   tax-taxi-network:
