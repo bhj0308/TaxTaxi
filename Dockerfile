@@ -39,4 +39,4 @@ RUN useradd -m -u 1000 django && chown -R django:django /app
 USER django
 
 EXPOSE 8000
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
+CMD ["uvicorn", "taxtaxi.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

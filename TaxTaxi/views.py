@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .forms import ShipmentForm
 
+
 def shipment_calculator(request):
     result = None
     
